@@ -1,4 +1,5 @@
 import logging as log
+import os
 import re
 import json
 import csv
@@ -16,6 +17,8 @@ from selenium.common.exceptions import StaleElementReferenceException
 class OtoMotoScrapper:
     
     URL = 'https://www.otomoto.pl'
+    LOG_PATH = 'artifacts/logs'
+    SCRAP_PATH = 'artifacts/scrapper'
 
     MAX_RESULTS = 2
 
@@ -23,7 +26,8 @@ class OtoMotoScrapper:
         self.vehicle_data = vehicle_data
         self.vehicle = self.vehicle_data['model'] + ' ' + self.vehicle_data['mark']
         
-        self.driver = webdriver.Chrome()
+        self.prepare_artifacts()
+        self.driver = webdriver.Chrome(service_args=[f'--log-path={self.LOG_PATH}'])
         self.driver.get(OtoMotoScrapper.URL)
 
         self.data = []
@@ -54,11 +58,11 @@ class OtoMotoScrapper:
         results = []
 
         offer_urls = list(self.get_offer_urls())
-        for enum, url in enumerate(offer_urls):
+        for url in offer_urls:
             self.driver.get(url)
 
             results2 = self.get_specific_offer_info()
-            results2.update({'id': enum, 'url': url})
+            results2.update({'url': url})
             results.append(results2)
         
         self.data.append({'car': self.vehicle, 'additionalInfo': [], 'results': results})
@@ -108,8 +112,12 @@ class OtoMotoScrapper:
 
     @staticmethod
     def save_data(data):
-        filename = 'otomoto_scrap'
-
+        """
+        Saves results to txt and json files.
+        :param data = 
+        """
+        filename = os.path.join(OtoMotoScrapper.SCRAP_PATH, 'otomoto_scrap')
+        
         with open(f'{filename}.json', 'w') as f:
             json.dump(data, f, indent=4)
 
@@ -124,6 +132,11 @@ class OtoMotoScrapper:
                     carwriter.writerow([car, d['price'], d['contact'], d['url'], d['image']])
         
         log.info(f'Data saved to {filename}.txt')
+    
+    def prepare_artifacts(self):
+        for _path in [self.LOG_PATH, self.SCRAP_PATH]:
+            if not os.path.exists(_path):
+                os.mkdir(_path)
 
     def clean(self):
         self.driver.close()

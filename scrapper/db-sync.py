@@ -57,12 +57,9 @@ class DbSync:
                 sys.exit()
                 
     def prepare_db(self):
-        engine = create_engine(f"postgresql+psycopg2://{os.environ['USER']}:{os.environ['PASSWORD']}@{os.environ['hostname']}/{os.environ['DB_NAME']}")
+        engine = create_engine(f"postgresql+psycopg2://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['HOSTNAME']}/{os.environ['POSTGRES_DB']}")
         Base.metadata.create_all(bind=engine)
         return sessionmaker(bind=engine)()
-
-    # def create_car_table(self):
-    #     if not self.db.dialect.has_table(self.db, CARS_TABLE):
 
     @staticmethod
     def load_data(csv_file):

@@ -20,6 +20,8 @@ class OtoMotoScrapper:
     LOG_PATH = 'artifacts/logs'
     SCRAP_PATH = 'artifacts/scrapper'
 
+    DOCKER_ARGS = ['verbose', 'headless', 'disable-gpu', 'no-sandbox']
+
     MAX_RESULTS = 2
 
     def __init__(self, vehicle_data):
@@ -27,10 +29,26 @@ class OtoMotoScrapper:
         self.vehicle = self.vehicle_data['model'] + ' ' + self.vehicle_data['mark']
         
         self.prepare_artifacts()
-        self.driver = webdriver.Chrome(service_args=[f'--log-path={self.LOG_PATH}'])
+
+        self.driver = self.estabilish_driver()
         self.driver.get(OtoMotoScrapper.URL)
 
         self.data = []
+
+    def prepare_artifacts(self):
+        for _path in [self.LOG_PATH, self.SCRAP_PATH]:
+            if not os.path.exists(_path):
+                os.makedirs(_path)
+
+    def estabilish_driver(self):
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument(f'--log-path={self.LOG_PATH}/chromedriver.log')
+
+        if os.environ.get('SCRAPPER_ENV', '') == 'DOCKER':
+            for arg in self.DOCKER_ARGS:
+                chrome_options.add_argument(f'--{arg}')
+    
+        return webdriver.Chrome(chrome_options=chrome_options)
 
     def select_vehicle_element(self, element, string):
         """
@@ -99,8 +117,9 @@ class OtoMotoScrapper:
 
         car_image_url = self.driver.find_element_by_xpath('//*[@id="offer-photos"]/div[2]/div/div/div[1]/div/div/img').get_attribute('src')
 
-        # Download car image ocally.
-        urlretrieve(car_image_url, f'{phone_number}-car.jpg')
+        # Download car image locally.
+        image = f'{self.vehicle}_{phone_number}.jpg'.replace(' ', '_')
+        self.download_car_image(car_image_url, image)
 
         return {'price': price, 'contact': phone_number, 'image': car_image_url} 
         
@@ -109,6 +128,13 @@ class OtoMotoScrapper:
         self.get_offer_info()
 
         self.save_data(self.data)
+
+    @staticmethod
+    def download_car_image(url, name):
+        image_path = os.path.join(OtoMotoScrapper.SCRAP_PATH, 'images')
+        if not os.path.exists(image_path):
+            os.mkdir(image_path)
+        urlretrieve(url, f'{image_path}/{name}')
 
     @staticmethod
     def save_data(data):
@@ -133,11 +159,6 @@ class OtoMotoScrapper:
         
         log.info(f'Data saved to {filename}.txt')
     
-    def prepare_artifacts(self):
-        for _path in [self.LOG_PATH, self.SCRAP_PATH]:
-            if not os.path.exists(_path):
-                os.mkdir(_path)
-
     def clean(self):
         self.driver.close()
     

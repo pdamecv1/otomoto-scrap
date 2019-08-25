@@ -17,4 +17,4 @@ RUN python3 -m pip install selenium && \
 
 # Execute script
 RUN mkdir -p artifacts/logs artifacts/scrapper
-CMD ["bash", "entrypoint.sh"]
+ENTRYPOINT ["bash", "entrypoint.sh"]

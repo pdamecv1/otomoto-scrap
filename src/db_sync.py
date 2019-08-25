@@ -1,8 +1,9 @@
 import os
 import sys
 import csv
+import logging as log
 from os.path import join, dirname
-from settings import REQUIRED_VARS, CARS_TABLE
+from .settings import REQUIRED_VARS, CARS_TABLE
 from dotenv import load_dotenv
 from sqlalchemy import (create_engine, inspect,
                         Table, Column, Integer, String, MetaData)
@@ -11,6 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 
+logger = log.getLogger(__name__)
 Base = declarative_base()
 
 
@@ -48,12 +50,12 @@ class DbSync:
         if is_env:
             load_dotenv(env_path)
         else:
-            print(f'{DbSync.ENV_FILE} file is not present. Trying to fetch vars directly from env...')
+            logger.info(f'{DbSync.ENV_FILE} file is not present. Trying to fetch vars directly from env...')
             try:
                 for var in REQUIRED_VARS:
                     os.environ[var]
             except KeyError:
-                print(f'No required variables detected. Please set following environment variables: {REQUIRED_VARS}')
+                logger.info(f'No required variables detected. Please set following environment variables: {REQUIRED_VARS}')
                 sys.exit()
                 
     def prepare_db(self):
@@ -78,14 +80,9 @@ class DbSync:
             try:
                 self.db.commit()
             except (IntegrityError, InvalidRequestError) as e:
-                print('Cannot add data because:')
-                print(e)
+                logger.info('Cannot add data:')
+                logger.error(e)
 
     def inspect_db(self):
         inspector = inspect(self.db)
-        print(inspector.get_columns(CARS_TABLE))
-
-
-if __name__ == '__main__':
-    dbs = DbSync()
-    dbs.insert_car_data()
+        logger.info(inspector.get_columns(CARS_TABLE))

@@ -23,8 +23,11 @@ Fill up input.json with information concerning the car, i.e.
 
 ```json
 {
-    "model": "BMW", 
-    "mark": "M3"
+    "car_spec": {
+        "model": "BMW", 
+        "mark": "M3"
+    },
+    "download_images": false
 }
 ```
 

@@ -1,0 +1,8 @@
+{
+    "car_spec": {
+        "make": "Acura", 
+        "model": "Legend"
+    },
+    "results": 5,
+    "download_image": false
+}

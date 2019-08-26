@@ -30,14 +30,14 @@ if __name__ == '__main__':
     create_logger()
     
     # Scrapper
-    log.info(f'Data in input.json: {data}')
+    log.info(f'Data provided in input.json: {data}')
     sc = OtoMotoScrapper(input_data=data)
     sc.scrap()
 
-    # DB sync
-    dbs = DbSync() 
-    dbs.insert_car_data()
+#     # DB sync
+#     dbs = DbSync() 
+#     dbs.insert_car_data()
 
-    # Generate report
-    gr = GenerateReport(dbs.db, Car)
-    gr.generate_report()
+#     # Generate report
+#     gr = GenerateReport(dbs.db, Car)
+#     gr.generate_report()

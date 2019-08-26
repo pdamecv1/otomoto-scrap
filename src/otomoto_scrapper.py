@@ -39,7 +39,7 @@ class OtoMotoScrapper:
         self.is_download = input_data.get('download_image', False)
         self.max_results = input_data.get('results', self.MAX_RESULTS)
 
-        self.vehicle = self.car_data['model'] + ' ' + self.car_data['mark']
+        self.vehicle = self.car_data['make'] + ' ' + self.car_data['model']
         
         self.driver = self.estabilish_driver()
         self.driver.get(URL)
@@ -62,8 +62,20 @@ class OtoMotoScrapper:
     
         return webdriver.Chrome(chrome_options=chrome_options)
 
-    @staticmethod
-    def select_vehicle_element(element, string):
+    def search_vehicle(self):
+        
+        select_brand = self.driver.find_element_by_id('param571')
+        select_mark = self.driver.find_element_by_id('param573')
+        print(f'brand, mark: {select_brand}, {select_mark}')
+        self.select_vehicle_element(select_brand, self.car_data['make'])  # brand / BMW
+        self.select_vehicle_element(select_mark, self.car_data['model'])  # mark / M3
+
+        # search = WebDriverWait(self.driver, 10).until(
+        #     EC.element_to_be_clickable((By.XPATH, '//*[@id="searchmain_29"]/button[1]'))
+        # )
+        self.driver.find_element_by_xpath('//*[@id="searchmain_29"]/button[1]').click()
+
+    def select_vehicle_element(self, element, string):
         """
         Selects vehicle's model, mark, price range, etc. from select element
         that is located in search box at main page: https://www.otomoto.pl
@@ -77,36 +89,34 @@ class OtoMotoScrapper:
         element = None
         for ele in select.options:
             if string in ele.text:
+
                 element = ele
                 logger.info(f'{string} found in: {ele}')
-                ele.click()
+                self.driver.implicitly_wait(2)
+                element.click()
                 break
 
         if element is None:
             logger.info(f'{string} not found in: {select}')
 
-    def search_vehicle(self):
-        select_brand = self.driver.find_element_by_id('param571')
-        select_mark = self.driver.find_element_by_id('param573')
-        
-        self.select_vehicle_element(select_brand, '')  # brand / BMW
-        self.select_vehicle_element(select_mark, 'M3')  # mark / M3
-        self.driver.find_element_by_xpath('//*[@id="searchmain_29"]/button[1]').click()
+    def get_available_offers(self):
+        """Gets available offers in range of max results."""
+        offer_list = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'om-list-container'))
+        )
+        articles = offer_list.find_elements_by_tag_name('article')
+        log.info(f'{len(articles)} offers has been found.')
 
-    def get_offer_info(self):
-        results = []
-
-        offer_urls = list(self.get_offer_urls())
-        for url in offer_urls:
-            self.driver.get(url)
-
-            results2 = self.get_specific_offer_info()
-            results2.update({'url': url})
-            results.append(results2)
-        
-        self.data.append({'car': self.vehicle, 'additionalInfo': [], 'results': results})
+        # Drop results out of desired range.
+        if len(articles) > self.max_results:
+            del articles[self.max_results:]
+            log.info(f'Reducing offer results to satisfy desired range: {self.max_results}')
+        return articles
 
     def get_offer_urls(self):
+        """Gets url of an offer"""
+        articles = self.get_available_offers()
+
         for num in range(1, self.max_results + 1):
             element = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.XPATH, f'//*[@id="body-container"]/div[2]/div[1]/div/div[1]/div[4]/article[{num}]'))
@@ -144,7 +154,20 @@ class OtoMotoScrapper:
             self.download_car_image(car_image_url, image)
 
         return {'price': price, 'contact': phone_number, 'image': car_image_url} 
+
+    def get_offer_info(self):
+        results = []
+
+        offer_urls = list(self.get_offer_urls())
+        for url in offer_urls:
+            self.driver.get(url)
+
+            results2 = self.get_specific_offer_info()
+            results2.update({'url': url})
+            results.append(results2)
         
+        self.data.append({'car': self.vehicle, 'additionalInfo': [], 'results': results})
+
     def download_car_image(self, url, name):
         """Downloads car image.
 

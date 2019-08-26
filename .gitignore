@@ -1,4 +1,5 @@
 .vscode
+artifacts
 venv
 
 *.log

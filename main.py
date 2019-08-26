@@ -2,7 +2,8 @@ import os
 import json
 import logging as log
 from src.otomoto_scrapper import OtoMotoScrapper
-from src.db_sync import DbSync
+from src.db_sync import DbSync, Car
+from src.report import GenerateReport
 from src.settings import LOG_PATH, SCRAP_PATH
 
 def load_json(filename):
@@ -24,16 +25,19 @@ if __name__ == '__main__':
 
     # Preparation
     data = load_json('input.json')
+    
     prepare_artifacts()
     create_logger()
     
     # Scrapper
+    log.info(f'Data in input.json: {data}')
     sc = OtoMotoScrapper(input_data=data)
     sc.scrap()
 
     # DB sync
-    dbs = DbSync()
+    dbs = DbSync() 
     dbs.insert_car_data()
 
     # Generate report
-    # TBD
+    gr = GenerateReport(dbs.db, Car)
+    gr.generate_report()

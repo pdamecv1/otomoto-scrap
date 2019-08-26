@@ -1,8 +1,8 @@
-import logging as log
 import os
 import re
 import json
 import csv
+import logging as log
 from urllib.request import urlretrieve
 from .settings import URL, DOCKER_ARGS, SCRAP_PATH, LOG_PATH
 
@@ -19,11 +19,25 @@ logger = log.getLogger(__name__)
 
 
 class OtoMotoScrapper:
-    
+
+    MAX_RESULTS = 10
+
     def __init__(self, input_data):
+        """Scrapper used for automating specific car search at https://www.otomoto.pl.
+
+        Arguments:
+        input_data -- data to control workflow of automation. Example in input.json
+            car_spec -- contains fields for searchbox on main page.
+                *model -- BMW / Audi
+                *mark  -- M3 / Q4
+            results -- number of pages to be scrapped.
+            download_file -- whether to download car image locally in artifacts.
+
+        * Required fields.
+        """
         self.car_data = input_data['car_spec']
-        self.is_download = input_data['download_image']
-        self.max_results = input_data['results']
+        self.is_download = input_data.get('download_image', False)
+        self.max_results = input_data.get('results', self.MAX_RESULTS)
 
         self.vehicle = self.car_data['model'] + ' ' + self.car_data['mark']
         
@@ -33,6 +47,12 @@ class OtoMotoScrapper:
         self.data = []
 
     def estabilish_driver(self):
+        """
+        Creates chromedriver instance with arguments.
+        
+        If used inside Docker, specify env variable: SCRAPPER_ENV=DOCKER
+        to inject additional arguments to driver for stability.
+        """
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument(f'--log-path={LOG_PATH}/chromedriver.log')
 
@@ -42,9 +62,15 @@ class OtoMotoScrapper:
     
         return webdriver.Chrome(chrome_options=chrome_options)
 
-    def select_vehicle_element(self, element, string):
+    @staticmethod
+    def select_vehicle_element(element, string):
         """
-        Selects vehicle element: model, mark, price, etc.
+        Selects vehicle's model, mark, price range, etc. from select element
+        that is located in search box at main page: https://www.otomoto.pl
+
+        Arguments:
+        element -- selenium select node
+        string  -- desired word, i.e. BMW, M3, etc.
         """
         select = Select(element)
 
@@ -59,12 +85,12 @@ class OtoMotoScrapper:
         if element is None:
             logger.info(f'{string} not found in: {select}')
 
-    def select_vehicle(self):
+    def search_vehicle(self):
         select_brand = self.driver.find_element_by_id('param571')
         select_mark = self.driver.find_element_by_id('param573')
         
-        self.select_vehicle_element(select_brand, 'BMW')
-        self.select_vehicle_element(select_mark, 'M3')
+        self.select_vehicle_element(select_brand, '')  # brand / BMW
+        self.select_vehicle_element(select_mark, 'M3')  # mark / M3
         self.driver.find_element_by_xpath('//*[@id="searchmain_29"]/button[1]').click()
 
     def get_offer_info(self):
@@ -112,21 +138,20 @@ class OtoMotoScrapper:
 
         car_image_url = self.driver.find_element_by_xpath('//*[@id="offer-photos"]/div[2]/div/div/div[1]/div/div/img').get_attribute('src')
 
-        # Download car image locally.
+        # Downloads car image locally.
         if self.is_download:
             image = f'{self.vehicle}_{phone_number}.jpg'.replace(' ', '_')
             self.download_car_image(car_image_url, image)
 
         return {'price': price, 'contact': phone_number, 'image': car_image_url} 
         
-    def scrap(self):
-        self.select_vehicle()
-        self.get_offer_info()
+    def download_car_image(self, url, name):
+        """Downloads car image.
 
-        self.save_data(self.data)
-
-    @staticmethod
-    def download_car_image(url, name):
+        Arguments:
+        url -- url of an image
+        name -- filename
+        """
         image_path = os.path.join(SCRAP_PATH, 'images')
         if not os.path.exists(image_path):
             os.mkdir(image_path)
@@ -134,9 +159,10 @@ class OtoMotoScrapper:
 
     @staticmethod
     def save_data(data):
-        """
-        Saves results to txt and json files.
-        :param data = 
+        """Saves data to txt and json files.
+
+        Arguments:
+        data --  example data structure can be found in README.MD
         """
         filename = os.path.join(SCRAP_PATH, 'otomoto_scrap')
         
@@ -147,7 +173,7 @@ class OtoMotoScrapper:
         
         with open(f'{filename}.txt', 'w', newline='') as csvfile:
             carwriter = csv.writer(csvfile, delimiter=',')
-            carwriter.writerow(['Car', 'Price', 'Contact', 'Url', 'Image'])
+            carwriter.writerow(['car', 'price', 'contact', 'url', 'image'])
             for i in data:
                 car = i['car']
                 for d in i['results']:
@@ -156,4 +182,12 @@ class OtoMotoScrapper:
         logger.info(f'Data saved to {filename}.txt')
     
     def clean(self):
+        """Closes chromdriver instance."""
         self.driver.close()
+
+    def scrap(self):
+        self.search_vehicle()
+        self.get_offer_info()
+
+        self.save_data(self.data)
+        self.clean()

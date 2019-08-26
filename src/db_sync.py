@@ -3,8 +3,9 @@ import sys
 import csv
 import logging as log
 from os.path import join, dirname
-from .settings import REQUIRED_VARS, CARS_TABLE
 from dotenv import load_dotenv
+from .settings import REQUIRED_VARS, CARS_TABLE
+
 from sqlalchemy import (create_engine, inspect,
                         Table, Column, Integer, String, MetaData)
 from sqlalchemy.orm import sessionmaker
@@ -34,6 +35,10 @@ class Car(Base):
         self.url = url
         self.image = image
 
+    def __repr__(self):
+        return f"""<User(car='{self.car}', price='{self.price}', contact='{self.contact}',
+                 url='{self.url}', image='{self.image}')>"""
+
 
 class DbSync:
 
@@ -59,6 +64,7 @@ class DbSync:
                 sys.exit()
                 
     def prepare_db(self):
+        # TBD: refactor str.
         engine = create_engine(f"postgresql+psycopg2://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['HOSTNAME']}/{os.environ['POSTGRES_DB']}")
         Base.metadata.create_all(bind=engine)
         return sessionmaker(bind=engine)()

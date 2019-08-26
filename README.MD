@@ -1,5 +1,5 @@
 # Otomoto Automation
-Project's goal is to automate the search of car in [otomoto](https://www.otomoto.pl) website. 
+Project's goal is to automate the search of car at [otomoto](https://www.otomoto.pl) website. 
 
 Main features:
 - automate search for car with specific criterias (model, mark, price, etc.)
@@ -8,7 +8,7 @@ Main features:
 - generate report 
 
 
-## Prerequsites
+## Prerequisites
 - Chromedriver 76. For more information refer to [official site](https://sites.google.com/a/chromium.org/chromedriver/downloads).
 - Python 3.7 with modules in requirements.txt
 - PostgreSQL DBMS, ver 11
@@ -44,12 +44,13 @@ POSTGRES_DB=otomoto
 
 ### 3. Execution
 
-- Docker:
+Docker:
+
 ```bash
 docker-compose up
 ```
 
-- Standard
+Standard:
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -57,11 +58,12 @@ python3 main.py
 ```
 
 ## Artifacts
-Scrapper stores logs, scrapper output and optionally images if declared in input.json. It will create following directory structure:
+Scrapper stores logs, results and optionally images if declared in input.json. It will create following directory structure:
 
 ```
 artifacts
 ├───logs
+│       debug.log
 │       geckodriver.log
 │
 └───scrapper
@@ -110,7 +112,7 @@ BMW M3,120 000,698 523 814,https://www.otomoto.pl/oferta/bmw-m3-dkg-pdc-mpower-I
 ```
 
 ## Database
-*cars* table has following structure:
+Data structure of *cars* table:
 
 ```txt
 | Column  |       Type        |

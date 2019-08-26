@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .car-table {
+                border: solid 1px #DDEEEE;
+                border-collapse: collapse;
+                border-spacing: 0;
+                text-align: center;
+                font-family: Arial, sans-serif;
+            }
+            .car-table thead th {
+                background-color: #d4d4d4;
+                border: solid 1px #d4d4d4;
+                color: #336B6B;
+                padding: 10px;
+                /* text-shadow: 1px 1px 1px #fff; */
+                font-size: 15px;
+            }
+            .car-table tbody td {
+                border: solid 1px #DDEEEE;
+                color: #333;
+                padding: 2px;
+                text-shadow: 1px 1px 1px #fff;
+                font-size: 14px;
+                width: 20%;
+            }
+        </style>
+    <body>
+        <h1>Car report generated on {{ date }} by <a href="https://github.com/pdamec/otomoto-scrap">OtomotoScrapper</a></h1>
+        <table class="car-table">
+            <thead>
+                <tr>
+                    <th>Car</th>
+                    <th>Price [PLN]</th>
+                    <th>Contact</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                    <tr>
+                        <td>{{ row.car }}</td>
+                        <td>{{ row.price }}</td>
+                        <td>{{ row.contact }}</td>
+                        <td><a href="{{ row.image }}" target="_blank"><img src="{{ row.image }}" width="100" height="100" alt="{{ row.car }}"></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody> 
+        </table>
+    </body>
+</html>

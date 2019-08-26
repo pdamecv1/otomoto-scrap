@@ -9,3 +9,6 @@ DOCKER_ARGS = ['verbose', 'headless', 'disable-gpu', 'no-sandbox']
 
 # Logging
 LOG_PATH = 'artifacts/logs'
+
+# Report
+REPORT_PATH = 'artifacts/report'

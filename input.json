@@ -1,8 +1,8 @@
 {
     "car_spec": {
-        "make": "Acura", 
-        "model": "Legend"
+        "make": "BMW", 
+        "model": "M3"
     },
-    "results": 5,
-    "download_image": false
+    "results": 10,
+    "download_image": true
 }

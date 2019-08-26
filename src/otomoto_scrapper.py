@@ -5,14 +5,16 @@ import csv
 import logging as log
 from urllib.request import urlretrieve
 from .settings import URL, DOCKER_ARGS, SCRAP_PATH, LOG_PATH
+import time
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException
 
 
 logger = log.getLogger(__name__)
@@ -28,12 +30,12 @@ class OtoMotoScrapper:
         Arguments:
         input_data -- data to control workflow of automation. Example in input.json
             car_spec -- contains fields for searchbox on main page.
-                *model -- BMW / Audi
-                *mark  -- M3 / Q4
-            results -- number of pages to be scrapped.
+                *make   -- BMW | Audi
+                *model  -- M3  | Q4
+            results -- number of offers to be scrapped.
             download_file -- whether to download car image locally in artifacts.
 
-        * Required fields.
+        * Required fields, rest is optional.
         """
         self.car_data = input_data['car_spec']
         self.is_download = input_data.get('download_image', False)
@@ -63,16 +65,12 @@ class OtoMotoScrapper:
         return webdriver.Chrome(chrome_options=chrome_options)
 
     def search_vehicle(self):
-        
-        select_brand = self.driver.find_element_by_id('param571')
-        select_mark = self.driver.find_element_by_id('param573')
-        print(f'brand, mark: {select_brand}, {select_mark}')
-        self.select_vehicle_element(select_brand, self.car_data['make'])  # brand / BMW
-        self.select_vehicle_element(select_mark, self.car_data['model'])  # mark / M3
+        make_ele = self.driver.find_element_by_id('param571')
+        model_ele = self.driver.find_element_by_id('param573')
 
-        # search = WebDriverWait(self.driver, 10).until(
-        #     EC.element_to_be_clickable((By.XPATH, '//*[@id="searchmain_29"]/button[1]'))
-        # )
+        self.select_vehicle_element(make_ele, self.car_data['make'])  # BMW
+        self.select_vehicle_element(model_ele, self.car_data['model'])  # M3
+
         self.driver.find_element_by_xpath('//*[@id="searchmain_29"]/button[1]').click()
 
     def select_vehicle_element(self, element, string):
@@ -92,7 +90,6 @@ class OtoMotoScrapper:
 
                 element = ele
                 logger.info(f'{string} found in: {ele}')
-                self.driver.implicitly_wait(2)
                 element.click()
                 break
 
@@ -101,13 +98,13 @@ class OtoMotoScrapper:
 
     def get_available_offers(self):
         """Gets available offers in range of max results."""
-        offer_list = WebDriverWait(self.driver, 10).until(
+        offers = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'om-list-container'))
         )
-        articles = offer_list.find_elements_by_tag_name('article')
-        log.info(f'{len(articles)} offers has been found.')
+        articles = offers.find_elements_by_tag_name('article')
+        log.info(f'Number of found offers: {len(articles)}')
 
-        # Drop results out of desired range.
+        # Drop results being out of desired range.
         if len(articles) > self.max_results:
             del articles[self.max_results:]
             log.info(f'Reducing offer results to satisfy desired range: {self.max_results}')
@@ -117,56 +114,64 @@ class OtoMotoScrapper:
         """Gets url of an offer"""
         articles = self.get_available_offers()
 
-        for num in range(1, self.max_results + 1):
-            element = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, f'//*[@id="body-container"]/div[2]/div[1]/div/div[1]/div[4]/article[{num}]'))
-            )
-            num += 1
-            yield element.get_attribute('data-href')
-
-    def get_specific_offer_info(self):
-        price = self.driver.find_element_by_class_name('offer-price').get_attribute('data-price')
-
-        # attempt = 1
-        # max_attempts = 5
-        # self.driver.implicitly_wait(4) #
-        # phone_number = self.driver.find_element_by_xpath('//*[@id="siteWrap"]/main/section/div[3]/div[2]/span/span/span[3]').click()
-
-        # while True:
-        #     try:
-        #         phone_number = self.driver.find_element_by_xpath('//*[@id="siteWrap"]/main/section/div[3]/div[2]/span/span/span[2]').text
-        #         break
-        #     except StaleElementReferenceException:
-        #         if attempt == max_attempts:
-        #             raise
-        #         attempt += 1
-        
-        phone_number = self.driver.find_element_by_xpath('//*[@id="siteWrap"]/main/section/div[3]/div[2]/span/span/span[3]').click()
-        #phone_number = self.driver.find_element_by_class_name('phone-n$numberBoxumber.seller-phones__number').text
-        self.driver.implicitly_wait(10)
-        phone_number = self.driver.find_element_by_xpath('//*[@id="siteWrap"]/main/section/div[3]/div[2]/span/span/span[2]').text
-
-        car_image_url = self.driver.find_element_by_xpath('//*[@id="offer-photos"]/div[2]/div/div/div[1]/div/div/img').get_attribute('src')
-
-        # Downloads car image locally.
-        if self.is_download:
-            image = f'{self.vehicle}_{phone_number}.jpg'.replace(' ', '_')
-            self.download_car_image(car_image_url, image)
-
-        return {'price': price, 'contact': phone_number, 'image': car_image_url} 
+        for article in articles:
+            ActionChains(self.driver).move_to_element(article).perform()
+            yield article.get_attribute('data-href')
 
     def get_offer_info(self):
+        """
+        Gets information per offer.
+        Returns final data that will be later saved in artifacts and/or put to DB.
+        """
         results = []
 
         offer_urls = list(self.get_offer_urls())
         for url in offer_urls:
             self.driver.get(url)
 
-            results2 = self.get_specific_offer_info()
-            results2.update({'url': url})
-            results.append(results2)
+            offer_info = self.get_specific_offer_info()
+            offer_info.update({'url': url})
+            results.append(offer_info)
         
         self.data.append({'car': self.vehicle, 'additionalInfo': [], 'results': results})
+
+    def get_specific_offer_info(self):
+        """Gets price, contact, car image."""
+        # Price
+        price_ele = self.driver.find_element_by_class_name('offer-price')
+        price = price_ele.get_attribute('data-price')
+
+        # Phone number
+        try:
+            con_ele = self.driver.find_element_by_class_name('seller-phones')
+
+            # con_ele= WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'seller-phones')))
+            click_ele = con_ele.find_element_by_xpath('span[1]/span[3]')
+            ActionChains(self.driver).move_to_element(con_ele).click(click_ele).perform()
+
+            time.sleep(10)  # TBD: change logic for ensuring the number is visible.
+            number_ele = con_ele.find_element_by_xpath('span[1]/span[2]')
+            phone_number = number_ele.text
+        except NoSuchElementException as e:
+            phone_number = None
+            logger.info(f'Phone number was not provided for {self.driver.current_url}')
+            logger.error(e)
+
+        # Image
+        try:
+            img_ele = self.driver.find_element_by_class_name('photo-item')
+            car_image_url = img_ele.find_element_by_xpath('img[1]').get_attribute('src')
+        except NoSuchElementException as e:
+            car_image_url = None
+            logger.info(f'Car image does not exist for offer: {self.driver.current_url}')
+            logger.error(e)
+
+        # Downloads car image locally.
+        if self.is_download and car_image_url is not None:
+            image = f'{self.vehicle}_{phone_number}.jpg'.replace(' ', '_')
+            self.download_car_image(car_image_url, image)
+
+        return {'price': price, 'contact': phone_number, 'image': car_image_url} 
 
     def download_car_image(self, url, name):
         """Downloads car image.
@@ -185,7 +190,7 @@ class OtoMotoScrapper:
         """Saves data to txt and json files.
 
         Arguments:
-        data --  example data structure can be found in README.MD
+        data -- example data structure can be found in README.MD
         """
         filename = os.path.join(SCRAP_PATH, 'otomoto_scrap')
         
@@ -203,7 +208,7 @@ class OtoMotoScrapper:
                     carwriter.writerow([car, d['price'], d['contact'], d['url'], d['image']])
         
         logger.info(f'Data saved to {filename}.txt')
-    
+
     def clean(self):
         """Closes chromdriver instance."""
         self.driver.close()

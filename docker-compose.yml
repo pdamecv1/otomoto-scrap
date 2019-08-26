@@ -18,7 +18,5 @@ services:
     env_file:
       - ./scrapper/.env_db
 
-
-
 volumes:
   postgres_data:

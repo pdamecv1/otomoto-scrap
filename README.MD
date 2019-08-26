@@ -1,8 +1,8 @@
-# Otomoto Automation
-Project's goal is to automate the search of car at [otomoto](https://www.otomoto.pl) website. 
+# Otomoto Scrap
+Project's goal is to automate the search for car at [otomoto](https://www.otomoto.pl) website. 
 
 Main features:
-- automate search for car with specific criterias (model, mark, price, etc.)
+- automate search for car with specific criterias (make, model, price, etc.)
 - Postgresql database setup (user, db, table)
 - store data in DB and plain file
 - generate report 
@@ -24,10 +24,11 @@ Fill up input.json with information concerning the car, i.e.
 ```json
 {
     "car_spec": {
-        "model": "BMW", 
-        "mark": "M3"
+        "make": "BMW", 
+        "model": "M3"
     },
-    "download_images": false
+    "results": 15,
+    "download_image": true
 }
 ```
 
@@ -64,7 +65,9 @@ Scrapper stores logs, results and optionally images if declared in input.json. I
 artifacts
 ├───logs
 │       debug.log
-│       geckodriver.log
+│
+├───report
+│       scrapper_report.html
 │
 └───scrapper
     │   otomoto_scrap.json

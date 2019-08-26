@@ -46,6 +46,7 @@ class GenerateReport:
         if not os.path.exists(REPORT_PATH):
             os.makedirs(REPORT_PATH)
         
+        
         with open(os.path.join(REPORT_PATH, self.TEMPLATE), 'wb') as f:
             f.write(data)
             log.info(f'{self.TEMPLATE} created.')

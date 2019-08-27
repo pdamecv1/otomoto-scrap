@@ -3,8 +3,8 @@ Project's goal is to automate the search for car at [otomoto](https://www.otomot
 
 Main features:
 - automate search for car with specific criterias (make, model, price, etc.)
-- Postgresql database setup (user, db, table)
-- store data in DB and plain file
+- Postgresql database setup {user,db,table}
+- store data in DB and files {json,txt}
 - generate report 
 
 
@@ -39,9 +39,12 @@ Fill up .env_db with variables used for DB, i.e.:
 ```env
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=admin123
-HOSTNAME=db
+POSTGRESQL_HOSTNAME=localhost
 POSTGRES_DB=otomoto
+POSTGRESQL_PORT=5432
 ```
+
+While using Docker, set *POSTGRESQL_HOSTNAME* to compose service (i.e. db) or container hostname.
 
 ### 3. Execution
 

@@ -2,7 +2,9 @@ version: '3.7'
 
 services:
   scrapper:
-    build: ./scrapper/
+    build: 
+      context: ./
+      dockerfile: ./src/docker/Dockerfile
     ports:
       - 4444:4444
     volumes: 
@@ -13,10 +15,19 @@ services:
       - db
   db:
     image: postgres:11.5-alpine
+    ports:
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - ./scrapper/.env_db
+      - ./src/.env_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart:
+      always
 
 volumes:
   postgres_data:

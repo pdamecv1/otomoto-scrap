@@ -10,11 +10,12 @@ RUN apk update && \
 
 # Prepare files
 WORKDIR /code
-COPY * /code/
+COPY . /code/
+RUN mkdir -p artifacts/logs artifacts/scrapper
 
 RUN python3 -m pip install selenium && \
     python3 -m pip install -r requirements.txt
 
 # Execute script
-RUN mkdir -p artifacts/logs artifacts/scrapper
-ENTRYPOINT ["bash", "entrypoint.sh"]
+# ENTRYPOINT ["bash", "src/docker/entrypoint.sh"]
+ENTRYPOINT ["python", "main.py"]

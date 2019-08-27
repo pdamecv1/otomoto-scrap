@@ -48,6 +48,15 @@ class DbSync:
         self.verify_db_info()
         self.db = self.prepare_db()
 
+    @property
+    def db_connection(self):
+        user = os.environ['POSTGRES_USER']
+        passwd = os.environ['POSTGRES_PASSWORD']
+        hostname = os.environ['POSTGRES_HOSTNAME']
+        port = os.environ['POSTGRES_PORT']
+        db = os.environ['POSTGRES_DB']
+        return f'postgresql+psycopg2://{user}:{passwd}@{hostname}:{port}/{db}'
+
     def verify_db_info(self):
         env_path = join(dirname(__file__), DbSync.ENV_FILE)
         is_env = os.path.isfile(env_path)
@@ -64,8 +73,8 @@ class DbSync:
                 sys.exit()
                 
     def prepare_db(self):
-        # TBD: refactor str.
-        engine = create_engine(f"postgresql+psycopg2://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['HOSTNAME']}/{os.environ['POSTGRES_DB']}")
+        engine = create_engine(self.db_connection)
+        log.info(f'Connected to: {self.db_connection}')
         Base.metadata.create_all(bind=engine)
         return sessionmaker(bind=engine)()
 
@@ -73,8 +82,8 @@ class DbSync:
     def load_data(csv_file):
         with open(csv_file, newline='') as f:
             next(f)
+            
             car_data = csv.reader(f, delimiter=',')
-        
             for row in car_data:
                 yield row
 

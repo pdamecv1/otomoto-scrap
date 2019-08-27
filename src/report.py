@@ -6,6 +6,7 @@ import jinja2
 
 logger = log.getLogger(__name__)
 
+
 class GenerateReport:
 
     TEMPLATE = 'report_template.html'
@@ -46,7 +47,6 @@ class GenerateReport:
         if not os.path.exists(REPORT_PATH):
             os.makedirs(REPORT_PATH)
         
-        
         with open(os.path.join(REPORT_PATH, self.TEMPLATE), 'wb') as f:
             f.write(data)
             log.info(f'{self.TEMPLATE} created.')
@@ -55,6 +55,3 @@ class GenerateReport:
         data = list(self.get_car_data())
         rendered_template = self.render_template(data)
         self.save_report(rendered_template)
-
-    
-

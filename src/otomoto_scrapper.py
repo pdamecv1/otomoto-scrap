@@ -144,8 +144,6 @@ class OtoMotoScrapper:
         # Phone number
         try:
             con_ele = self.driver.find_element_by_class_name('seller-phones')
-
-            # con_ele= WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'seller-phones')))
             click_ele = con_ele.find_element_by_xpath('span[1]/span[3]')
             ActionChains(self.driver).move_to_element(con_ele).click(click_ele).perform()
 

@@ -4,5 +4,5 @@
         "model": "M3"
     },
     "results": 10,
-    "download_image": true
+    "download_image": false
 }

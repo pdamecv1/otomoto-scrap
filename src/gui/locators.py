@@ -16,3 +16,24 @@ class SearchAreaLocators:
     PRICE_AREA = CONTENT + '//div[@data-key="price"]'
     MIN_PRICE = PRICE_AREA + '/span[1]//select'
     MAX_PRICE = PRICE_AREA + '/span[2]//select'
+
+    # Mileage
+    MILEAGE_AREA = CONTENT + '//div[@data-key="mileage"]'
+    MIN_MILEAGE = MILEAGE_AREA + '/span[1]//select'
+    MAX_MILEAGE = MILEAGE_AREA + '/span[2]//select'
+
+    # Production
+    PRODUCTION_AREA = CONTENT + '//div[@data-key="year"]'
+    MIN_YEAR = PRODUCTION_AREA + '/span[1]//select'
+    MAX_YEAR = PRODUCTION_AREA + '/span[2]//select'
+
+    # Fuel type
+    FUEL_AREA = CONTENT + '//div[@data-key="fuel_type"]'
+
+    # VIN history
+    HAS_VIN = CONTENT + '//div[@data-key="has_vin"]/label[2]'
+    
+    # Search button
+    SUBMIT = CONTENT + '//button[@type="submit"]'
+    
+    

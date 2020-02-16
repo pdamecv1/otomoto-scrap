@@ -1,8 +1,18 @@
 {
     "car_spec": {
-        "make": "BMW", 
-        "model": "M3"
+        "make": "Honda", 
+        "model": "Accord",
+        "state": "all",
+        "min_price": 2000,
+        "max_price": 100000,
+        "min_mileage": 20000,
+        "max_mileage": 125000,
+        "min_year": 2010,
+        "max_year": 2020,
+        "has_vin": true,
+        "fuel_type": "diesel"
+
     },
-    "results": 10,
+    "results": 1000,
     "download_image": false
 }

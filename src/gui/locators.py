@@ -35,5 +35,15 @@ class SearchAreaLocators:
     
     # Search button
     SUBMIT = CONTENT + '//button[@type="submit"]'
-    
-    
+
+
+class DetailedSearchLocators:
+    HEADER_ROOT = '//header[@class="header-container"]'
+    DETAILED_PARAMS_ROOT = '//fieldset[@id="paramsList"]'
+    SEARCH_RESULTS_ROOT = '//div[@id="listContainer"]'
+
+    RESULTS = SEARCH_RESULTS_ROOT + '//div[@class="offers list"]'
+    RESULT = RESULTS + '//article'
+    NO_RESULTS = '//div[@class="om-emptyinfo"]'
+
+    PAGINATION = '//ul[@class="om-pager rel"]'

@@ -8,6 +8,7 @@ from basepage import BasePage
 from factory import SeleniumFactory as SF
 from locators import SearchAreaLocators
 from utils import Utils
+from detailed_search import DetailedSearch
 
 
 log = logging.getLogger(__name__)
@@ -15,20 +16,10 @@ log = logging.getLogger(__name__)
 
 class SearchArea(BasePage):
     """
-    Class containing functionality connected to the Searchbox/Searcharea at the main page.
-    Example usage:
-        searchbox = SearchArea(driver)
-        searchbox.select_state_of_use('new')
-        searchbox.select_car_make('BMW')
-        searchbox.select_car_model('M8')
-        searchbox.select_price_range(2000, 200000)
-        searchbox.select_mileage_range(20000, 125000)
-        searchbox.select_production_range(2010, 2015)
-        searchbox.check_vin_history()
-        searchbox.select_fuel_type('diesel')
-        searchbox.click_search()
+    Class containing functionality connected to the Searchbox/Searcharea 
+    at the main page: https://www.otomoto.pl/
     """
-    
+
     TIMEOUT = 10
 
     def select_state_of_use(self, state='all'):
@@ -119,34 +110,16 @@ class SearchArea(BasePage):
         """
         if fuel != 'all':
             fuel_xpath = SearchAreaLocators.FUEL_AREA + f'/span[@data-key="{fuel}"]'
-            fuel_ele = WebDriverWait(driver, self.TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, fuel_xpath)))
+            fuel_ele = WebDriverWait(self.driver, self.TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, fuel_xpath)))
             fuel_ele.click()
 
     def check_vin_history(self):
         """Clicks on checkbox to show only offers that have VIN history."""
         # vin_btn = self.driver.find_element_by_xpath('//*[@class="search-area__status-label hasVinCheckbox"]')
-        vin_btn = WebDriverWait(driver, self.TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, SearchAreaLocators.HAS_VIN)))
+        vin_btn = WebDriverWait(self.driver, self.TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, SearchAreaLocators.HAS_VIN)))
         vin_btn.click() 
 
     def click_search(self):
         """Clicks on the search button."""
-        search_btn = WebDriverWait(driver, self.TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, SearchAreaLocators.SUBMIT)))
+        search_btn = WebDriverWait(self.driver, self.TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, SearchAreaLocators.SUBMIT))) 
         search_btn.click()
-
-
-if __name__ == '__main__':
-    chrome_options = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(chrome_options=chrome_options)
-    driver.get('https://www.otomoto.pl')
-    
-    searchbox = SearchArea(driver)
-    searchbox.select_state_of_use('new')
-    searchbox.select_car_make('BMW')
-    searchbox.select_car_model('M8')
-    searchbox.select_price_range(2000, 200000)
-    searchbox.select_mileage_range(20000, 125000)
-    searchbox.select_production_range(2010, 2015)
-    searchbox.check_vin_history()
-    searchbox.select_fuel_type('diesel')
-    searchbox.click_search()
-    

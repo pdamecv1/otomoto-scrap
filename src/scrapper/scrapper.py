@@ -19,8 +19,6 @@ class Scrapper(BasePage):
         self.detailed_search = DetailedSearch(self.driver)
         self.offer = Offer(self.driver)
 
-        self.offer_urls = []
-
     def search(self, data):
         #self.searchbox.select_state_of_use('new')
         self.searchbox.select_car_make('BMW')
@@ -38,13 +36,17 @@ class Scrapper(BasePage):
             raise Exception(msg)
         self.pagination.accept_cookies()
 
-    def get_offer_from_all_pages(self):
+    def get_offer_data(self):
+        offer_urls = self.get_offer_urls()
+        return self.offer.get_offers_data(offer_urls)
+
+    def get_offer_urls(self):
+        offer_urls = []
         for _ in range(1, self.pagination.get_pages_num()):
-            self._get_offers_from_current_page()
+            offer_urls += list(self._get_offers_from_current_page())
             self.pagination.click_next_page()
+        return offer_urls
     
     def _get_offers_from_current_page(self):
         for result in self.detailed_search.get_results():
-            offer = self.detailed_search.get_offer_link(result).split('/')[-1]
-            self.offer_urls.append(offer)
-
+            yield self.detailed_search.get_offer_link(result).split('/')[-1]

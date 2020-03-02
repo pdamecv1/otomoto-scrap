@@ -18,8 +18,6 @@ if __name__ == '__main__':
     scrapper = Scrapper(driver=driver)
     scrapper.search(data={})
     scrapper.verify_results()
-    scrapper.get_offer_from_all_pages()
 
     # Testing the offer data
-    print(scrapper.offer_urls)
     scrapper.get_offer_data()

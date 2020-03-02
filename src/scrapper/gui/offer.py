@@ -12,6 +12,33 @@ class Offer(BasePage):
 
     TIMEOUT = 10
 
+    def get_offers_data(self, offer_urls):
+        offer_data = []
+        for offer_url in offer_urls:
+            offer_data.append(self._get_offer_data(offer_url))
+            from pprint import pprint
+            pprint(offer_data)
+        return offer_data
+
+    def _get_offer_data(self, offer_url):
+        offer_url = Vars.OFFER_URL + '/' + offer_url
+        self.driver.get(offer_url)
+
+        record = {
+            'offerUrl': offer_url,
+            'location': self.get_location(),
+            'imgUrl': self.get_image_url(),
+            'phone': self.get_phone_number(),
+            'carSpec': self.get_car_spec()
+        }
+        return record
+
+    def get_car_spec(self):
+        record = {
+            'make': 
+        }
+        pass
+
     def get_location(self):
         location = WebDriverWait(self.driver, self.TIMEOUT).until(
             EC.visibility_of_element_located(OfferLocators.LOCATION)
@@ -35,20 +62,3 @@ class Offer(BasePage):
             EC.visibility_of_element_located(OfferLocators.BASE_IMAGE)
             )
         return image.get_attribute('src') 
-    
-    def get_all_offer_data(self, offer_urls):
-        offer_data = []
-        for offer_url in offer_urls:
-            offer_data.append(self.get_offer_data(offer_url))
-
-    def get_offer_data(self, offer_url):
-        offer_url = Vars.OFFER_URL + '/' + offer_url
-        self.driver.get(offer_url)
-
-        record = {
-            'offerUrl': offer_url,
-            'location': self.get_location(),
-            'imgUrl': self.get_image_url(),
-            'phone': self.get_phone_number(),
-        }
-        return record

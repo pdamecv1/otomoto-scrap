@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 # GUI
 from .basepage import BasePage
+from .pagination import Pagination
 from .locators import DetailedSearchLocators as DSLocators
 
 
@@ -17,7 +18,7 @@ class DetailedSearch(BasePage):
         https://www.otomoto.pl/ + osobowe|czesci|motocykle-i-quady
     The page also contains the search results.
     """
-    
+
     TIMEOUT = 10
 
     def get_results(self):

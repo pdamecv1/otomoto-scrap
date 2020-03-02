@@ -6,6 +6,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from .basepage import BasePage
 from .locators import OfferLocators
 from .variables import Vars
+from .factory import SeleniumFactory as SF
 
 
 class Offer(BasePage):
@@ -22,7 +23,7 @@ class Offer(BasePage):
 
     def _get_offer_data(self, offer_url):
         offer_url = Vars.OFFER_URL + '/' + offer_url
-        self.driver.get(offer_url)
+        SF.get_page(self.driver, offer_url)
 
         record = {
             'offerUrl': offer_url,
@@ -35,9 +36,9 @@ class Offer(BasePage):
 
     def get_car_spec(self):
         record = {
-            'make': 
+            'make': None,
         }
-        pass
+        return record
 
     def get_location(self):
         location = WebDriverWait(self.driver, self.TIMEOUT).until(

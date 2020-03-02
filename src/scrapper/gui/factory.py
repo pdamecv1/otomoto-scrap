@@ -35,3 +35,16 @@ class SeleniumFactory(BasePage):
     @staticmethod
     def move_to(context, element):
         ActionChains(context).move_to_element(element).perform()
+
+    @staticmethod
+    def get_page(driver, url):
+        retry_max = 10
+        retry = 0
+
+        while retry <= retry_max:
+            try:
+                driver.get(url)
+                break
+            except Exception as e:
+                print(e)
+                retry += 1

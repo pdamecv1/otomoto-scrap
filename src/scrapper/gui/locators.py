@@ -1,3 +1,6 @@
+from selenium.webdriver.common.by import By  # TODO: change all elements to By
+
+
 class SearchAreaLocators:
     SEARCH_AREA = '//div[contains(@class, "om-searcharea")]'
     
@@ -44,6 +47,31 @@ class DetailedSearchLocators:
 
     RESULTS = SEARCH_RESULTS_ROOT + '//div[@class="offers list"]'
     RESULT = RESULTS + '//article'
+    OFFER_LINK = '//h2/a'
+
     NO_RESULTS = '//div[@class="om-emptyinfo"]'
 
-    PAGINATION = '//ul[@class="om-pager rel"]'
+
+class PaginationLocators:
+    PAGINATION_ROOT = (By.XPATH, '//ul[@class="om-pager rel"]')
+    NEXT_PAGE = (By.XPATH, PAGINATION_ROOT[1] + '//li[@class="next abs"]/a')
+    PREVIOUS_PAGE = (By.XPATH, PAGINATION_ROOT[1] + '//li[@class="prev abs"]/a')
+    LAST_PAGE = (By.XPATH, PAGINATION_ROOT[1] + '/li[last()]')
+    CURRENT_PAGE = (By.XPATH, PAGINATION_ROOT[1] + '//li[@class="active"]')
+    PAGES = (By.XPATH, PAGINATION_ROOT[1] + '//span[@class="page"]/parent::a')
+
+    COOKIE = (By.XPATH, '//*[@id="cookiesBar"]/div/div/a')
+
+
+class OfferLocators:
+    PRICE = (By.XPATH, '//span[@class="offer-price__number"]')
+    CURRENCY = (By.XPATH, '//span[@class="offer-price__currency"]')
+
+    LOCATION = (By.XPATH, '//span[@class="seller-box__seller-address__label"]')
+    BASE_IMAGE = (By.XPATH, '//div[@class="photo-item"]/img')
+
+    PHONES_ROOT = '//div[@class="seller-phones"]'
+    PHONE = (By.XPATH, PHONES_ROOT + '/div[@class="number-box newPhoneStyle"]')
+    CLICK_PHONE = (By.XPATH, PHONES_ROOT + '//a[@class="spoiler seller-phones__button"]')
+
+    OFFER_PARAMS_ROOT = '//div[@class="offer-params"]'

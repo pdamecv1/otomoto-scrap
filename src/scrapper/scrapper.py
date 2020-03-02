@@ -48,10 +48,3 @@ class Scrapper(BasePage):
             offer = self.detailed_search.get_offer_link(result).split('/')[-1]
             self.offer_urls.append(offer)
 
-    def get_offer_data(self):
-        
-        offer_url = Vars.OFFER_URL + '/' + self.offer_urls[1]
-        self.driver.get(offer_url)
-        print(self.offer.get_location())
-        print(self.offer.get_image_url())
-        self.offer.get_phone_number()

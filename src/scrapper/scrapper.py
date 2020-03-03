@@ -38,13 +38,15 @@ class Scrapper(BasePage):
 
     def get_offer_data(self):
         offer_urls = self.get_offer_urls()
-        return self.offer.get_offers_data(offer_urls)
+        return self.offer.get_offers_data(offer_urls[0:1])
 
     def get_offer_urls(self):
         offer_urls = []
-        for _ in range(1, self.pagination.get_pages_num()):
+        pages_num = self.pagination.get_pages_num()
+        for _ in range(1, pages_num):
             offer_urls += list(self._get_offers_from_current_page())
             self.pagination.click_next_page()
+        log.info(f'"{len(offer_urls)}" found for "{pages_num}" pages.')
         return offer_urls
     
     def _get_offers_from_current_page(self):

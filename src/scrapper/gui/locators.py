@@ -69,9 +69,14 @@ class OfferLocators:
 
     LOCATION = (By.XPATH, '//span[@class="seller-box__seller-address__label"]')
     BASE_IMAGE = (By.XPATH, '//div[@class="photo-item"]/img')
+    DESCRIPTION = (By.XPATH, '//div[@class="offer-description__description"]')
 
     PHONES_ROOT = '//div[@class="seller-phones"]'
     PHONE = (By.XPATH, PHONES_ROOT + '/div[@class="number-box newPhoneStyle"]')
     CLICK_PHONE = (By.XPATH, PHONES_ROOT + '//a[@class="spoiler seller-phones__button"]')
 
-    OFFER_PARAMS_ROOT = '//div[@class="offer-params"]'
+    SPECIFICATION_ROOT = '//div[@class="offer-params"]'
+
+    META_ROOT = '//div[@class="offer-meta"]'
+    CREATION_DATE = (By.XPATH, META_ROOT + '/span[1]/span[@class="offer-meta__value"]')
+    OFFER_ID = (By.XPATH, META_ROOT + '/span[2]/span[@class="offer-meta__value"]')

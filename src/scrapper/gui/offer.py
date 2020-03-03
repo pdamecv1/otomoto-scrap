@@ -5,7 +5,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 # GUI
 from .basepage import BasePage
 from .locators import OfferLocators
-from .variables import Vars
+from .variables import Vars, OfferVars
 from .factory import SeleniumFactory as SF
 
 
@@ -16,29 +16,42 @@ class Offer(BasePage):
     def get_offers_data(self, offer_urls):
         offer_data = []
         for offer_url in offer_urls:
-            offer_data.append(self._get_offer_data(offer_url))
-            from pprint import pprint
-            pprint(offer_data)
+            offer_data.append(self.get_offer_data(offer_url))
         return offer_data
 
-    def _get_offer_data(self, offer_url):
+    def get_offer_data(self, offer_url):
         offer_url = Vars.OFFER_URL + '/' + offer_url
         SF.get_page(self.driver, offer_url)
 
         record = {
-            'offerUrl': offer_url,
+            'url': offer_url,
             'location': self.get_location(),
-            'imgUrl': self.get_image_url(),
+            'creation': self.get_creation_time(),
+            'image': self.get_image_url(),
             'phone': self.get_phone_number(),
-            'carSpec': self.get_car_spec()
+            'description': self.get_description(),
+            'specification': self.get_car_spec()
         }
         return record
 
+    def get_description(self):
+        description = WebDriverWait(self.driver, self.TIMEOUT).until(
+            EC.visibility_of_element_located(OfferLocators.DESCRIPTION)
+            )
+        return description.text.strip()
+
+    def get_creation_time(self):
+        offer_time = WebDriverWait(self.driver, self.TIMEOUT).until(
+            EC.visibility_of_element_located(OfferLocators.CREATION_DATE)
+            )
+        return offer_time.text.strip()
+
     def get_car_spec(self):
-        record = {
-            'make': None,
-        }
-        return record
+        specification = {}
+        for spec_name, gui_spec_translation in OfferVars.CAR_SPEC.items():
+            spec_xpath = f'//span[contains(text(), "{gui_spec_translation}")]/following-sibling::div'
+            specification[spec_name] = self.driver.find_element_by_xpath(spec_xpath).text.strip()
+        return specification
 
     def get_location(self):
         location = WebDriverWait(self.driver, self.TIMEOUT).until(

@@ -1,4 +1,5 @@
 import logging
+import json
 from selenium import webdriver
 # GUI
 from gui.variables import Vars
@@ -19,5 +20,6 @@ if __name__ == '__main__':
     scrapper.search(data={})
     scrapper.verify_results()
 
-    # Testing the offer data
-    scrapper.get_offer_data()
+    # Save data
+    with open('scrapper_data.json', 'w') as f:
+        json.dump(scrapper.get_offer_data(), f, indent=4)    

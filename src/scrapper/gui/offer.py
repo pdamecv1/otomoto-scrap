@@ -2,6 +2,7 @@ import logging
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException
 # GUI
 from .basepage import BasePage
 from .locators import OfferLocators
@@ -49,8 +50,12 @@ class Offer(BasePage):
     def get_car_spec(self):
         specification = {}
         for spec_name, gui_spec_translation in OfferVars.CAR_SPEC.items():
-            spec_xpath = f'//span[contains(text(), "{gui_spec_translation}")]/following-sibling::div'
-            specification[spec_name] = self.driver.find_element_by_xpath(spec_xpath).text.strip()
+            try:
+                spec_xpath = f'//span[contains(text(), "{gui_spec_translation}")]/following-sibling::div'
+                spec_value = self.driver.find_element_by_xpath(spec_xpath).text.strip()
+            except NoSuchElementException:
+                spec_value = None
+            specification[spec_name] = spec_value
         return specification
 
     def get_location(self):
@@ -61,6 +66,7 @@ class Offer(BasePage):
 
     def get_phone_number(self):
         phones = []
+        # TODO: make implementation. :|
         # phones_ele = WebDriverWait(self.driver, self.TIMEOUT).until(
         #     EC.presence_of_all_elements_located(OfferLocators.PHONE)
         #     )

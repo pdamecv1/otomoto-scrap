@@ -2,6 +2,7 @@ import logging
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 # GUI
 from .basepage import BasePage
 from .locators import PaginationLocators
@@ -21,11 +22,15 @@ class Pagination(BasePage):
             EC.presence_of_element_located(PaginationLocators.PAGINATION_ROOT))
 
     def get_pages(self):
-        pages = WebDriverWait(self.driver, self.TIMEOUT).until(
-            EC.presence_of_all_elements_located(PaginationLocators.PAGES)
-            )
-        SF.move_to(self.driver, self.pagination_root)
-        pages.append(self.get_current_page())  # add current page
+        try:
+            pages = WebDriverWait(self.driver, self.TIMEOUT).until(
+                EC.presence_of_all_elements_located(PaginationLocators.PAGES)
+                )
+            SF.move_to(self.driver, self.pagination_root)
+            pages.append(self.get_current_page())  # add current page
+        except TimeoutException:
+            # WA for lack of pagination.
+            pages = []
         return pages
 
     def get_pages_num(self):

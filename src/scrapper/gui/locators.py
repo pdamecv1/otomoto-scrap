@@ -1,4 +1,4 @@
-from selenium.webdriver.common.by import By  # TODO: change all elements to By (?)
+from selenium.webdriver.common.by import By  # TODO: change all elements to By (decide)
 
 
 class SearchAreaLocators:

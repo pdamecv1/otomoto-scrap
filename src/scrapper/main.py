@@ -1,5 +1,6 @@
 import logging
 import json
+import requests
 from selenium import webdriver
 # GUI
 from gui.variables import Vars
@@ -21,7 +22,13 @@ if __name__ == '__main__':
     scrapper = Scrapper(driver=driver, data=data)
     scrapper.search()
     scrapper.verify_results()
+    
+    for record in scrapper.get_offer_data():
+        req = requests.post('http://127.0.0.1:8000/offers/', data=record[0])
+        print(req.status_code)
+        print(req.text)
 
-    # Save data
-    with open('scrapper_data.json', 'w') as f:
-        json.dump(scrapper.get_offer_data(), f, indent=4)    
+    # # Save data
+    # with open('scrapper_data.json', 'w') as f:
+    #     json.dump(, f, indent=4)    
+    driver.close()

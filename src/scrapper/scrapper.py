@@ -60,7 +60,7 @@ class Scrapper(BasePage):
         self.searchbox.select_mileage_range(self.search_info.MIN_MILEAGE, 
                                             self.search_info.MAX_MILEAGE)
         self.searchbox.select_production_range(self.search_info.MIN_YEAR, 
-                                               self.search_info.MIN_YEAR)
+                                               self.search_info.MAX_YEAR)
         self.searchbox.select_fuel_type(self.search_info.FUEL_TYPE)
         if self.search_info.HAS_VIN:
             self.searchbox.check_vin_history()
@@ -68,13 +68,13 @@ class Scrapper(BasePage):
 
     def verify_results(self):
         if not self.detailed_search.is_any_results():
-            print(f'No results found for: {self.data}')
+            print(f'No results found for: {self.search_info.__dict__}')
             sys.exit()
         self.pagination.accept_cookies()
 
     def get_offer_data(self):
         offer_urls = self.get_offer_urls()
-        return self.offer.get_offers_data(offer_urls)
+        yield self.offer.get_offers_data(offer_urls)
 
     def get_offer_urls(self):
         pages_num = self.pagination.get_pages_num()
@@ -85,7 +85,7 @@ class Scrapper(BasePage):
         log.info(f'"{len(offer_urls)}" found for "{pages_num}" pages.')
         return offer_urls
 
-    def _get_offers_from_all_pages(self):
+    def _get_offers_from_all_pages(self): 
         offer_urls = []
         for _ in range(1, self.pagination.get_pages_num()):
             offer_urls += list(self._get_offers_from_current_page())

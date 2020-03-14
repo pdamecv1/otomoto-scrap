@@ -4,11 +4,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 # GUI
-from basepage import BasePage
-from factory import SeleniumFactory as SF
-from locators import SearchAreaLocators
-from utils import Utils
-from detailed_search import DetailedSearch
+from .basepage import BasePage
+from .factory import SeleniumFactory as SF
+from .locators import SearchAreaLocators
+from .utils import Utils
+from .detailed_search import DetailedSearch
 
 
 log = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ class SearchArea(BasePage):
             make [str]: BMW|Honda|Audi, etc.
         """
         make_element = self.driver.find_element_by_xpath(SearchAreaLocators.MAKE)
-        SF.select(element=make_element, value=make.lower())
+        SF.select(element_xpath=make_element, value=make.lower())
 
     def select_car_model(self, model):
         """
@@ -46,7 +46,7 @@ class SearchArea(BasePage):
             make [str]: M4|Accord|Q7, etc.
         """
         model_element = self.driver.find_element_by_xpath(SearchAreaLocators.MODEL)
-        SF.select(element=model_element, text=model)
+        SF.select(element_xpath=model_element, text=model)
 
     def select_price_range(self, min_price, max_price):
         """
@@ -60,11 +60,11 @@ class SearchArea(BasePage):
 
     def _select_min_price(self, min_price):
         min_price_ele = self.driver.find_element_by_xpath(SearchAreaLocators.MIN_PRICE)
-        SF.select(element=min_price_ele, text=Utils.format_integer(min_price) + ' PLN')
+        SF.select(element_xpath=min_price_ele, text=Utils.format_integer(min_price) + ' PLN')
 
     def _select_max_price(self, max_price):
         max_price_ele = self.driver.find_element_by_xpath(SearchAreaLocators.MAX_PRICE)
-        SF.select(element=max_price_ele, text=Utils.format_integer(max_price) + ' PLN')
+        SF.select(element_xpath=max_price_ele, text=Utils.format_integer(max_price) + ' PLN')
 
     def select_mileage_range(self, min_mileage, max_mileage):
         """
@@ -78,11 +78,11 @@ class SearchArea(BasePage):
 
     def _select_min_mileage(self, min_mileage):
         min_mileage_ele = self.driver.find_element_by_xpath(SearchAreaLocators.MIN_MILEAGE)
-        SF.select(element=min_mileage_ele, text=Utils.format_integer(min_mileage) + ' km')
+        SF.select(element_xpath=min_mileage_ele, text=Utils.format_integer(min_mileage) + ' km')
 
     def _select_max_mileage(self, max_mileage):
         max_mileage_ele = self.driver.find_element_by_xpath(SearchAreaLocators.MAX_MILEAGE)
-        SF.select(element=max_mileage_ele, text=Utils.format_integer(max_mileage) + ' km')
+        SF.select(element_xpath=max_mileage_ele, text=Utils.format_integer(max_mileage) + ' km')
 
     def select_production_range(self, min_year, max_year):
         """
@@ -96,11 +96,11 @@ class SearchArea(BasePage):
     
     def _select_min_year(self, min_year):
         min_year_ele = self.driver.find_element_by_xpath(SearchAreaLocators.MIN_YEAR)
-        SF.select(element=min_year_ele, text=min_year)
+        SF.select(element_xpath=min_year_ele, text=min_year)
 
     def _select_max_year(self, max_year):
         max_year_ele = self.driver.find_element_by_xpath(SearchAreaLocators.MAX_YEAR)
-        SF.select(element=max_year_ele, text=max_year)
+        SF.select(element_xpath=max_year_ele, text=max_year)
 
     def select_fuel_type(self, fuel):
         """
